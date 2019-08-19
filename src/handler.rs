@@ -1,9 +1,13 @@
 use crate::api::{get_weather, search_city};
+use clap::ArgMatches;
 use colored::*;
 
-pub fn search(city_name: &str) -> String {
+pub fn search(search_args: &ArgMatches) -> () {
+    let city_name: &str = search_args.value_of("city_name").unwrap_or("");
+
     println!("{}", String::from("Search Results:"));
-    search_city(city_name)
+
+    let search_result = search_city(city_name)
         .map(|results| {
             results.iter().fold("".to_string(), |text, result| {
                 format!(
@@ -16,11 +20,15 @@ pub fn search(city_name: &str) -> String {
             })
         })
         .map_err(|err| format!("Error - {}", err))
-        .unwrap()
+        .unwrap();
+
+    println!("{}", search_result);
 }
 
-pub fn get(woeid: &str) -> String {
-    get_weather(woeid)
+pub fn get(get_matches: &ArgMatches) -> () {
+    let woeid = get_matches.value_of("city_woid").unwrap_or("");
+
+    let get_result = get_weather(woeid)
         .map(|result| {
             let header = format!(
                 "{id} - {city_name}\n",
@@ -44,5 +52,7 @@ pub fn get(woeid: &str) -> String {
                 })
         })
         .map_err(|err| format!("Error - {}", err))
-        .unwrap()
+        .unwrap();
+
+    println!("{}", get_result);
 }

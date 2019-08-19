@@ -11,35 +11,31 @@ mod api;
 mod handler;
 mod types;
 
-use clap::{App, Arg};
 use self::handler::{get, search};
+use clap::{App, Arg, SubCommand};
 
 fn main() {
     let matches = App::new("weater")
         .version("1.0.0")
         .about("Get weater form https://www.metaweather.com/")
         .author("Vinícius Simões")
-        .arg(
-            Arg::with_name("COMMAND")
-                .takes_value(true)
-                .index(1)
-                .help("command to execute."),
+        .subcommand(
+            SubCommand::with_name("search")
+                .about("Search city by name")
+                .arg(Arg::with_name("city_name").help("City name")),
         )
-        .arg(
-            Arg::with_name("ARGUMENT")
-                .takes_value(true)
-                .index(2)
-                .require_delimiter(true)
-                .help("argument of command"),
+        .subcommand(
+            SubCommand::with_name("get")
+                .about("Get weather by city woid")
+                .arg(Arg::with_name("city_woid").help("City woid.")),
         )
         .get_matches();
 
-    let command = matches.value_of("COMMAND").unwrap();
-    let argument = matches.value_of("ARGUMENT").unwrap();
+    if let Some(search_matches) = matches.subcommand_matches("search") {
+        search(search_matches);
+    }
 
-    match command {
-        "search" => println!("{}", search(argument)),
-        "get" => println!("{}", get(argument)),
-        _ => println!("Choose a valid command. (wheater --help for more information)"),
+    if let Some(get_matches) = matches.subcommand_matches("get") {
+        get(get_matches);
     }
 }
