@@ -1,5 +1,11 @@
 use chrono::{DateTime, Utc};
 
+pub mod place;
+pub mod weather;
+
+#[derive(Debug)]
+pub struct WeatherError;
+
 #[derive(Deserialize, Debug)]
 pub struct ConsolidatedWeather {
     pub id: u64,

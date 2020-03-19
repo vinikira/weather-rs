@@ -7,10 +7,6 @@ extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
 
-mod api;
-mod handler;
-mod types;
-
 use self::handler::{get, search};
 use clap::{App, Arg, SubCommand};
 
