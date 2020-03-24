@@ -1,7 +1,22 @@
-use crate::types::weather::Weather;
-use crate::types::weather::WeatherState;
+use crate::types::weather::{Temperature, Weather, WeatherPrevision, WeatherState};
 
 impl Weather {
+    pub fn pretty(&self) -> String {
+        let header = format!("{}", self.place.pretty());
+
+        self.weather_previsions
+            .iter()
+            .fold(header, |text, weather_prevision| {
+                format!(
+                    "{}{weather_prevision}\n",
+                    text,
+                    weather_prevision = weather_prevision.pretty()
+                )
+            })
+    }
+}
+
+impl WeatherPrevision {
     pub fn state_emoji(&self) -> &'static str {
         match self.state {
             WeatherState::Snow => "❄️",
@@ -12,6 +27,45 @@ impl Weather {
             WeatherState::HeavyCloud => "☁️",
             WeatherState::LightCloud => "🌥️",
             WeatherState::Clear => "☀️",
+            WeatherState::NotDefined => "",
+        }
+    }
+
+    pub fn state_name(&self) -> &'static str {
+        match self.state {
+            WeatherState::Snow => "Snow️",
+            WeatherState::Sleet => "Sleet",
+            WeatherState::Hail => "Hail",
+            WeatherState::Thunderstorm => "Thunderstorm",
+            WeatherState::HeavyRain => "Heavy Rain",
+            WeatherState::LightRain => "Light Rain",
+            WeatherState::Showers => "Showers",
+            WeatherState::HeavyCloud => "Heavy Cloud",
+            WeatherState::LightCloud => "Light Cloud",
+            WeatherState::Clear => "Clear️",
+            WeatherState::NotDefined => "",
+        }
+    }
+
+    pub fn pretty(&self) -> String {
+        use colored::*;
+        format!(
+            "{emoji} {state_name:<12} - {date} - min. {min:.2} max. {max:.2}\n",
+            emoji = self.state_emoji().green().bold(),
+            state_name = self.state_name().green().bold(),
+            date = self.applicable_date,
+            min = format!("{}", self.min.pretty()).bold(),
+            max = format!("{}", self.max.pretty()).bold()
+        )
+    }
+}
+
+impl Temperature {
+    pub fn pretty(&self) -> String {
+        match self {
+            Self::Celsius(val) => format!("{:.2} °C", val),
+            Self::Farenheit(val) => format!("{:.2} °F", val),
+            Self::Kelvin(val) => format!("{:.2} K", val),
         }
     }
 }

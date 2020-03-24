@@ -1,11 +1,16 @@
 use crate::types::place::Place;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 
 pub struct Weather {
     pub place: Place,
+    pub place_parent: Place,
+    pub weather_previsions: Vec<WeatherPrevision>,
+}
+
+pub struct WeatherPrevision {
     pub state: WeatherState,
     pub created_date: DateTime<Utc>,
-    pub applicable_date: DateTime<Utc>,
+    pub applicable_date: NaiveDate,
     pub min: Temperature,
     pub max: Temperature,
     pub wind_speed: WindSpeed,
@@ -36,6 +41,7 @@ pub enum WindDirectionCompass {
     E,
     S,
     W,
+    NotDefined,
 }
 
 pub enum WeatherState {
@@ -49,4 +55,5 @@ pub enum WeatherState {
     Sleet,
     Snow,
     Thunderstorm,
+    NotDefined,
 }

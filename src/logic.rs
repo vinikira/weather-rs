@@ -1,4 +1,3 @@
-pub mod place;
-pub mod weather;
-
 mod error;
+mod place;
+mod weather;

@@ -1,4 +1,5 @@
 pub struct Place {
+    pub id: String,
     pub name: String,
     pub location_type: LocationType,
     pub coordinates: Coordinates,
@@ -16,4 +17,5 @@ pub enum LocationType {
     RegionOrStateOrProvince,
     Country,
     Continent,
+    NotDefined,
 }
