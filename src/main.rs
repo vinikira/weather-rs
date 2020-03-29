@@ -2,7 +2,7 @@ use clap::ArgMatches;
 use clap::{App, Arg, SubCommand};
 use std::collections::HashMap;
 use weather_rs::adapters::{metaweather, WeatherAdapter};
-use weather_rs::types::{WeatherError, WeatherResult};
+use weather_rs::types::WeatherError;
 
 fn main() {
     let providers = init_providers();
@@ -40,23 +40,11 @@ fn main() {
     };
 
     if let Some(search_matches) = matches.subcommand_matches("search") {
-        match search_location(search_matches, provider) {
-            Ok(status) => std::process::exit(status),
-            Err(error) => {
-                handle_error(error);
-                std::process::exit(1);
-            }
-        }
+        search_location(search_matches, provider);
     }
 
     if let Some(get_matches) = matches.subcommand_matches("get") {
-        match fetch_weather(get_matches, provider) {
-            Ok(status) => std::process::exit(status),
-            Err(error) => {
-                handle_error(error);
-                std::process::exit(1);
-            }
-        }
+        fetch_weather(get_matches, provider)
     }
 }
 
@@ -77,33 +65,44 @@ fn handle_error(e: WeatherError) {
     println!("{}", e);
 }
 
-fn search_location(search_args: &ArgMatches, adapter: &impl WeatherAdapter) -> WeatherResult<i32> {
+fn search_location(search_args: &ArgMatches, adapter: &impl WeatherAdapter) {
     let city_name = match search_args.value_of("place_name") {
         Some(name) => name,
-        None => return Err(WeatherError::MissingArgument),
+        None => {
+            handle_error(WeatherError::MissingArgument);
+            return ();
+        },
     };
 
-    let search_result: String = adapter
-        .search_place(city_name.to_string())?
-        .iter()
-        .map(|place| place.pretty())
-        .collect::<Vec<String>>()
-        .join("");
+    match adapter.search_place(city_name.to_string()) {
+        Ok(search_result) =>  {
+            let search_message = search_result
+                .iter()
+                .map(|place| place.pretty())
+                .collect::<Vec<String>>()
+                .join("");
 
-    println!("Search Results:\n\n{}", search_result);
-
-    Ok(0)
+            println!("Search Results:\n\n{}", search_message);
+        }
+        Err(error) => handle_error(error)
+    }
 }
 
-fn fetch_weather(get_matches: &ArgMatches, adapter: &impl WeatherAdapter) -> WeatherResult<i32> {
+fn fetch_weather(get_matches: &ArgMatches, adapter: &impl WeatherAdapter) {
     let id = match get_matches.value_of("place_id") {
         Some(id) => id,
-        None => return Err(WeatherError::MissingArgument),
+        None => {
+            handle_error(WeatherError::MissingArgument);
+            return ();
+        },
     };
 
-    let weather = adapter.get_weather(id.to_string())?;
-
-    println!("{}", weather.pretty());
-
-    Ok(0)
+    match adapter.get_weather(id.to_string()) {
+        Ok(weather_forecast_message) => {
+            println!("{}", weather_forecast_message.pretty());
+        },
+        Err(error) => {
+            handle_error(error)
+        }
+    }
 }

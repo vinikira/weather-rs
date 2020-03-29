@@ -18,14 +18,14 @@ impl fmt::Display for WeatherError {
 impl error::Error for WeatherError {}
 
 impl From<ParseFloatError> for WeatherError {
-    fn from(_error: ParseFloatError) -> Self {
+    fn from(error: ParseFloatError) -> Self {
+        dbg!(error);
         Self::ParseError
     }
 }
 
 impl From<reqwest::Error> for WeatherError {
-    fn from(error: reqwest::Error) -> Self {
-        println!("{}", error);
+    fn from(_error: reqwest::Error) -> Self {
         WeatherError::AdapterError
     }
 }

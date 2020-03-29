@@ -1,22 +1,22 @@
-use crate::types::weather::{Temperature, Weather, WeatherPrevision, WeatherState};
+use crate::types::weather::{Temperature, Weather, WeatherForecast, WeatherState};
 
 impl Weather {
     pub fn pretty(&self) -> String {
         let header = format!("{}", self.place.pretty());
 
-        self.weather_previsions
+        self.weather_forecasts
             .iter()
-            .fold(header, |text, weather_prevision| {
+            .fold(header, |text, weather_forecast| {
                 format!(
-                    "{}{weather_prevision}\n",
+                    "{}{weather_forecast}\n",
                     text,
-                    weather_prevision = weather_prevision.pretty()
+                    weather_forecast = weather_forecast.pretty()
                 )
             })
     }
 }
 
-impl WeatherPrevision {
+impl WeatherForecast {
     pub fn state_emoji(&self) -> &'static str {
         match self.state {
             WeatherState::Snow => "❄️",
@@ -50,10 +50,11 @@ impl WeatherPrevision {
     pub fn pretty(&self) -> String {
         use colored::*;
         format!(
-            "{emoji} {state_name:<12} - {date} - min. {min:.2} max. {max:.2}\n",
+            "{emoji}    {state_name:<12} - {date} - temp. {temp} min. {min} max. {max}\n",
             emoji = self.state_emoji().green().bold(),
             state_name = self.state_name().green().bold(),
             date = self.applicable_date,
+            temp = format!("{}", self.temp.pretty()).bold(),
             min = format!("{}", self.min.pretty()).bold(),
             max = format!("{}", self.max.pretty()).bold()
         )

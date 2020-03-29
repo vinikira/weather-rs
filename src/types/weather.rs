@@ -4,13 +4,14 @@ use chrono::{DateTime, NaiveDate, Utc};
 pub struct Weather {
     pub place: Place,
     pub place_parent: Place,
-    pub weather_previsions: Vec<WeatherPrevision>,
+    pub weather_forecasts: Vec<WeatherForecast>,
 }
 
-pub struct WeatherPrevision {
+pub struct WeatherForecast {
     pub state: WeatherState,
     pub created_date: DateTime<Utc>,
     pub applicable_date: NaiveDate,
+    pub temp: Temperature,
     pub min: Temperature,
     pub max: Temperature,
     pub wind_speed: WindSpeed,

@@ -1,7 +1,7 @@
 use crate::adapters::WeatherAdapter;
 use crate::types::place::{Coordinates, LocationType, Place};
 use crate::types::weather::{
-    Temperature, Weather, WeatherPrevision, WeatherState, WindDirection, WindDirectionCompass,
+    Temperature, Weather, WeatherForecast, WeatherState, WindDirection, WindDirectionCompass,
     WindSpeed,
 };
 use crate::types::{WeatherError, WeatherResult};
@@ -56,7 +56,7 @@ struct ConsolidatedWeather {
 
 impl WeatherAdapter for MetaWeatherApi {
     fn search_place(&self, location: String) -> WeatherResult<Vec<Place>> {
-        let url = format!("{}/location/search/?query={}", self.endpoint, location);
+        let url = format!("{}/api/location/search/?query={}", self.endpoint, location);
 
         let response_body: Vec<PlaceResponse> = reqwest::get(&url)?.json()?;
 
@@ -69,7 +69,7 @@ impl WeatherAdapter for MetaWeatherApi {
     }
 
     fn get_weather(&self, woeid: String) -> WeatherResult<Weather> {
-        let url = format!("{}/location/{}/", self.endpoint, woeid);
+        let url = format!("{}/api/location/{}/", self.endpoint, woeid);
 
         let weather_result: WeatherResponse = reqwest::get(&url)?.json()?;
 
@@ -92,8 +92,8 @@ impl TryFrom<&PlaceResponse> for Place {
         let latt_long: Vec<&str> = place_response.latt_long.split(",").collect();
 
         let coordinates = Coordinates {
-            latt: latt_long[0].parse::<f32>()?,
-            long: latt_long[1].parse::<f32>()?,
+            latt: latt_long[0].trim().parse::<f32>()?,
+            long: latt_long[1].trim().parse::<f32>()?,
         };
 
         let place = Place {
@@ -109,7 +109,7 @@ impl TryFrom<&PlaceResponse> for Place {
 
 fn consolidated_weather_to_weather_prevision(
     consolidated_weather: &ConsolidatedWeather,
-) -> WeatherResult<WeatherPrevision> {
+) -> WeatherResult<WeatherForecast> {
     let state = match consolidated_weather.weather_state_abbr.as_ref() {
         "sn" => WeatherState::Snow,
         "sl" => WeatherState::Sleet,
@@ -126,25 +126,27 @@ fn consolidated_weather_to_weather_prevision(
 
     let min = Temperature::Celsius(consolidated_weather.min_temp);
     let max = Temperature::Celsius(consolidated_weather.max_temp);
+    let temp = Temperature::Celsius(consolidated_weather.the_temp);
 
     let wind_speed = WindSpeed::KPH(consolidated_weather.wind_speed);
 
     let wind_direction = WindDirection::Degrees(consolidated_weather.wind_direction);
 
-    let wind_direction_compass = match consolidated_weather.wind_direction_compass.as_ref() {
-        "W" => WindDirectionCompass::W,
-        "E" => WindDirectionCompass::E,
-        "S" => WindDirectionCompass::S,
-        "N" => WindDirectionCompass::N,
+    let wind_direction_compass = match consolidated_weather.wind_direction_compass.chars().next() {
+        Some('W') => WindDirectionCompass::W,
+        Some('E') => WindDirectionCompass::E,
+        Some('S') => WindDirectionCompass::S,
+        Some('N') => WindDirectionCompass::N,
         _ => return Err(WeatherError::ParseError),
     };
 
-    let weather_prevision = WeatherPrevision {
+    let weather_prevision = WeatherForecast {
         state,
         created_date: consolidated_weather.created,
         applicable_date: consolidated_weather.applicable_date,
         min,
         max,
+        temp,
         wind_speed,
         wind_direction_compass,
         wind_direction,
@@ -158,13 +160,13 @@ impl TryFrom<&WeatherResponse> for Weather {
     type Error = WeatherError;
 
     fn try_from(weather_response: &WeatherResponse) -> Result<Self, WeatherError> {
-        let weather_previsions: WeatherResult<Vec<WeatherPrevision>> = weather_response
+        let weather_forecasts: WeatherResult<Vec<WeatherForecast>> = weather_response
             .consolidated_weather
             .iter()
             .map(consolidated_weather_to_weather_prevision)
             .collect();
 
-        let place_parent = PlaceResponse {
+        let place_response = PlaceResponse {
             title: weather_response.title.clone(),
             location_type: weather_response.location_type.clone(),
             woeid: weather_response.woeid,
@@ -172,9 +174,9 @@ impl TryFrom<&WeatherResponse> for Weather {
         };
 
         let weather = Weather {
-            place: Place::try_from(&weather_response.parent)?,
-            weather_previsions: weather_previsions?,
-            place_parent: Place::try_from(&place_parent)?,
+            place: Place::try_from(&place_response)?,
+            weather_forecasts: weather_forecasts?,
+            place_parent: Place::try_from(&weather_response.parent)?,
         };
 
         Ok(weather)
