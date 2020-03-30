@@ -69,13 +69,13 @@ fn search_location(search_args: &ArgMatches, adapter: &impl WeatherAdapter) {
     let city_name = match search_args.value_of("place_name") {
         Some(name) => name,
         None => {
-            handle_error(WeatherError::MissingArgument);
+            handle_error(WeatherError::MissingArgument("place name"));
             return ();
-        },
+        }
     };
 
     match adapter.search_place(city_name.to_string()) {
-        Ok(search_result) =>  {
+        Ok(search_result) => {
             let search_message = search_result
                 .iter()
                 .map(|place| place.pretty())
@@ -84,7 +84,7 @@ fn search_location(search_args: &ArgMatches, adapter: &impl WeatherAdapter) {
 
             println!("Search Results:\n\n{}", search_message);
         }
-        Err(error) => handle_error(error)
+        Err(error) => handle_error(error),
     }
 }
 
@@ -92,17 +92,15 @@ fn fetch_weather(get_matches: &ArgMatches, adapter: &impl WeatherAdapter) {
     let id = match get_matches.value_of("place_id") {
         Some(id) => id,
         None => {
-            handle_error(WeatherError::MissingArgument);
+            handle_error(WeatherError::MissingArgument("place id"));
             return ();
-        },
+        }
     };
 
     match adapter.get_weather(id.to_string()) {
         Ok(weather_forecast_message) => {
             println!("{}", weather_forecast_message.pretty());
-        },
-        Err(error) => {
-            handle_error(error)
         }
+        Err(error) => handle_error(error),
     }
 }

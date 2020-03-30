@@ -6,9 +6,9 @@ use std::num::ParseFloatError;
 impl fmt::Display for WeatherError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let msg = match self {
-            Self::ParseError => "Parser Error",
-            Self::AdapterError => "Adapter Error",
-            Self::MissingArgument => "Missing Argument",
+            Self::ParseError => "Parser Error".to_string(),
+            Self::AdapterError => "Adapter Error".to_string(),
+            Self::MissingArgument(argument_name) => format!("Missing argument {}", argument_name),
         };
 
         write!(f, "Error: {}", msg)
@@ -18,8 +18,7 @@ impl fmt::Display for WeatherError {
 impl error::Error for WeatherError {}
 
 impl From<ParseFloatError> for WeatherError {
-    fn from(error: ParseFloatError) -> Self {
-        dbg!(error);
+    fn from(_error: ParseFloatError) -> Self {
         Self::ParseError
     }
 }

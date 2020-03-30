@@ -8,7 +8,7 @@ pub struct Weather {
 }
 
 pub struct WeatherForecast {
-    pub state: WeatherState,
+    pub state: Option<WeatherState>,
     pub created_date: DateTime<Utc>,
     pub applicable_date: NaiveDate,
     pub temp: Temperature,
@@ -16,12 +16,13 @@ pub struct WeatherForecast {
     pub max: Temperature,
     pub wind_speed: WindSpeed,
     pub wind_direction: WindDirection,
-    pub wind_direction_compass: WindDirectionCompass,
+    pub wind_direction_compass: Option<WindDirectionCompass>,
     pub humidity: Humidity,
 }
 
 pub type Humidity = f32;
 
+#[derive(PartialEq, Debug)]
 pub enum Temperature {
     Celsius(f32),
     Farenheit(f32),
@@ -42,7 +43,6 @@ pub enum WindDirectionCompass {
     E,
     S,
     W,
-    NotDefined,
 }
 
 pub enum WeatherState {
@@ -56,5 +56,4 @@ pub enum WeatherState {
     Sleet,
     Snow,
     Thunderstorm,
-    NotDefined,
 }

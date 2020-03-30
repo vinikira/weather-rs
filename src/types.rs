@@ -5,7 +5,7 @@ pub mod weather;
 pub enum WeatherError {
     ParseError,
     AdapterError,
-    MissingArgument,
+    MissingArgument(&'static str),
 }
 
 pub type WeatherResult<T> = Result<T, WeatherError>;
