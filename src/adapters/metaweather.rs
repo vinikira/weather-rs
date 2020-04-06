@@ -1,6 +1,6 @@
 use crate::adapters::WeatherAdapter;
-use crate::types::place::{Coordinates, LocationType, Place};
-use crate::types::weather::{
+use crate::types::{Coordinates, LocationType, Place};
+use crate::types::{
     Temperature, Weather, WeatherForecast, WeatherState, WindDirection, WindDirectionCompass,
     WindSpeed,
 };
@@ -60,7 +60,7 @@ impl WeatherAdapter for MetaWeatherApi {
 
         let response_body: Vec<PlaceResponse> = reqwest::get(&url)?.json()?;
 
-        let places: Result<Vec<Place>, WeatherError> = response_body
+        let places: WeatherResult<Vec<Place>> = response_body
             .iter()
             .map(|place_response| Place::try_from(place_response))
             .collect();
@@ -111,17 +111,17 @@ fn consolidated_weather_to_weather_prevision(
     consolidated_weather: &ConsolidatedWeather,
 ) -> WeatherResult<WeatherForecast> {
     let state = match consolidated_weather.weather_state_abbr.as_ref() {
-        "sn" => Some(WeatherState::Snow),
-        "sl" => Some(WeatherState::Sleet),
-        "h" => Some(WeatherState::Hail),
-        "t" => Some(WeatherState::Thunderstorm),
-        "hr" => Some(WeatherState::HeavyRain),
-        "lr" => Some(WeatherState::LightRain),
-        "s" => Some(WeatherState::Showers),
-        "hc" => Some(WeatherState::HeavyCloud),
-        "lc" => Some(WeatherState::LightCloud),
-        "c" => Some(WeatherState::Clear),
-        _ => None,
+        "sn" => WeatherState::Snow,
+        "sl" => WeatherState::Sleet,
+        "h" => WeatherState::Hail,
+        "t" => WeatherState::Thunderstorm,
+        "hr" => WeatherState::HeavyRain,
+        "lr" => WeatherState::LightRain,
+        "s" => WeatherState::Showers,
+        "hc" => WeatherState::HeavyCloud,
+        "lc" => WeatherState::LightCloud,
+        "c" => WeatherState::Clear,
+        _ => return Err(WeatherError::ParseError),
     };
 
     let min = Temperature::Celsius(consolidated_weather.min_temp);
@@ -133,11 +133,11 @@ fn consolidated_weather_to_weather_prevision(
     let wind_direction = WindDirection::Degrees(consolidated_weather.wind_direction);
 
     let wind_direction_compass = match consolidated_weather.wind_direction_compass.chars().next() {
-        Some('W') => Some(WindDirectionCompass::W),
-        Some('E') => Some(WindDirectionCompass::E),
-        Some('S') => Some(WindDirectionCompass::S),
-        Some('N') => Some(WindDirectionCompass::N),
-        _ => None,
+        Some('W') => WindDirectionCompass::W,
+        Some('E') => WindDirectionCompass::E,
+        Some('S') => WindDirectionCompass::S,
+        Some('N') => WindDirectionCompass::N,
+        _ => return Err(WeatherError::ParseError),
     };
 
     let weather_prevision = WeatherForecast {

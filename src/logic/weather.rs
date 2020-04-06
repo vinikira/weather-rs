@@ -1,79 +1,78 @@
-use crate::types::weather::{Temperature, Weather, WeatherForecast, WeatherState};
+use crate::types::{Temperature, Weather, WeatherForecast, WeatherState};
 
-impl Weather {
-    pub fn pretty(&self) -> String {
-        let header = format!("{}", self.place.pretty());
+impl std::fmt::Display for Weather {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use colored::*;
 
-        self.weather_forecasts
+        let place_name = format!("{}", self.place.to_string());
+
+        let table_header = format!(
+            "{: ^14} | {: ^10} | {: ^10} | {: ^10} | {: ^10}",
+            "State".bold(),
+            "Date".bold(),
+            "Temp".bold(),
+            "Min".bold(),
+            "Max".bold()
+        );
+
+        let header = format!(
+            "{place}\n\n{table_header}\n{dots}\n",
+            place = place_name,
+            table_header = table_header,
+            dots = "-".repeat(66)
+        );
+
+        let weather_str = self
+            .weather_forecasts
             .iter()
             .fold(header, |text, weather_forecast| {
                 format!(
                     "{}{weather_forecast}\n",
                     text,
-                    weather_forecast = weather_forecast.pretty()
+                    weather_forecast = weather_forecast.to_string()
                 )
-            })
+            });
+
+        write!(f, "{}", weather_str)
     }
 }
 
 impl WeatherForecast {
-    pub fn state_emoji(&self) -> &'static str {
-        use WeatherState::*;
-
-        match self.state {
-            Some(Snow) => "❄️",
-            Some(Sleet) | Some(Hail) => "⛆",
-            Some(Thunderstorm) => "⛈️",
-            Some(HeavyRain) => "🌧️",
-            Some(LightRain) | Some(Showers) => "🌦",
-            Some(HeavyCloud) => "☁️",
-            Some(LightCloud) => "🌥️",
-            Some(Clear) => "☀️",
-            None => "",
-        }
-    }
-
     pub fn state_name(&self) -> &'static str {
         use WeatherState::*;
 
         match self.state {
-            Some(Snow) => "Snow️",
-            Some(Sleet) => "Sleet",
-            Some(Hail) => "Hail",
-            Some(Thunderstorm) => "Thunderstorm",
-            Some(HeavyRain) => "Heavy Rain",
-            Some(LightRain) => "Light Rain",
-            Some(Showers) => "Showers",
-            Some(HeavyCloud) => "Heavy Cloud",
-            Some(LightCloud) => "Light Cloud",
-            Some(Clear) => "Clear️",
-            None => "",
+            Snow => "Snow",
+            Sleet => "Sleet",
+            Hail => "Hail",
+            Thunderstorm => "Thunderstorm",
+            HeavyRain => "Heavy Rain",
+            LightRain => "Light Rain",
+            Showers => "Showers",
+            HeavyCloud => "Heavy Cloud",
+            LightCloud => "Light Cloud",
+            Clear => "Clear",
         }
     }
+}
 
-    pub fn pretty(&self) -> String {
+impl std::fmt::Display for WeatherForecast {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use colored::*;
-        format!(
-            "{emoji}    {state_name:<12} - {date} - temp. {temp} min. {min} max. {max}\n",
-            emoji = self.state_emoji().green().bold(),
+
+        write!(
+            f,
+            "{state_name: <14} | {date: <10} | {temp: <10} | {min: <10} | {max: <10}",
             state_name = self.state_name().green().bold(),
             date = self.applicable_date,
-            temp = format!("{}", self.temp.pretty()).bold(),
-            min = format!("{}", self.min.pretty()).bold(),
-            max = format!("{}", self.max.pretty()).bold()
+            temp = format!("{}", self.temp.to_string()),
+            min = format!("{}", self.min.to_string()),
+            max = format!("{}", self.max.to_string())
         )
     }
 }
 
 impl Temperature {
-    pub fn pretty(&self) -> String {
-        match self {
-            Self::Celsius(val) => format!("{:.2} °C", val),
-            Self::Farenheit(val) => format!("{:.2} °F", val),
-            Self::Kelvin(val) => format!("{:.2} K", val),
-        }
-    }
-
     pub fn to_celsius(&self) -> Self {
         match *self {
             Self::Farenheit(temp) => Self::Celsius((temp - 32f32) * (5f32 / 9f32)),
@@ -95,6 +94,16 @@ impl Temperature {
             Self::Celsius(temp) => Self::Kelvin(temp + 273.15f32),
             Self::Farenheit(temp) => Self::Kelvin((temp - 32f32) * (5f32 / 9f32) + 273.15f32),
             Self::Kelvin(temp) => Self::Kelvin(temp),
+        }
+    }
+}
+
+impl std::fmt::Display for Temperature {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Celsius(val) => write!(f, "{:.2} °C", val),
+            Self::Farenheit(val) => write!(f, "{:.2} °F", val),
+            Self::Kelvin(val) => write!(f, "{:.2} K", val),
         }
     }
 }

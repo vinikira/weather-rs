@@ -1,5 +1,5 @@
-use crate::types::place::Place;
-use crate::types::weather::Weather;
+use crate::types::Place;
+use crate::types::Weather;
 use crate::types::WeatherError;
 
 pub mod metaweather;

@@ -1,21 +1,22 @@
-use crate::types::place::Coordinates;
-use crate::types::place::Place;
+use crate::types::Coordinates;
+use crate::types::Place;
 
-impl Place {
-    pub fn pretty(&self) -> String {
+impl std::fmt::Display for Place {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use colored::*;
 
-        format!(
-            "{id} - {name} {latt_long}\n",
+        writeln!(
+            f,
+            "{id: >10} {name: <30} {latt_long: <10}",
             id = self.id.green().bold(),
             name = self.name.bold(),
-            latt_long = self.coordinates.pretty()
+            latt_long = self.coordinates.to_string()
         )
     }
 }
 
-impl Coordinates {
-    pub fn pretty(&self) -> String {
-        format!("({}, {})", self.latt, self.long)
+impl std::fmt::Display for Coordinates {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {})", self.latt, self.long)
     }
 }

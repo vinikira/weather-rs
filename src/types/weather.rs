@@ -8,7 +8,7 @@ pub struct Weather {
 }
 
 pub struct WeatherForecast {
-    pub state: Option<WeatherState>,
+    pub state: WeatherState,
     pub created_date: DateTime<Utc>,
     pub applicable_date: NaiveDate,
     pub temp: Temperature,
@@ -16,7 +16,7 @@ pub struct WeatherForecast {
     pub max: Temperature,
     pub wind_speed: WindSpeed,
     pub wind_direction: WindDirection,
-    pub wind_direction_compass: Option<WindDirectionCompass>,
+    pub wind_direction_compass: WindDirectionCompass,
     pub humidity: Humidity,
 }
 

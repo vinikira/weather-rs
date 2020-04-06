@@ -1,5 +1,8 @@
-pub mod place;
-pub mod weather;
+mod place;
+mod weather;
+
+pub use place::*;
+pub use weather::*;
 
 #[derive(Debug)]
 pub enum WeatherError {

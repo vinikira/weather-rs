@@ -78,11 +78,11 @@ fn search_location(search_args: &ArgMatches, adapter: &impl WeatherAdapter) {
         Ok(search_result) => {
             let search_message = search_result
                 .iter()
-                .map(|place| place.pretty())
+                .map(|place| place.to_string())
                 .collect::<Vec<String>>()
                 .join("");
 
-            println!("Search Results:\n\n{}", search_message);
+            println!("{}", search_message);
         }
         Err(error) => handle_error(error),
     }
@@ -99,7 +99,7 @@ fn fetch_weather(get_matches: &ArgMatches, adapter: &impl WeatherAdapter) {
 
     match adapter.get_weather(id.to_string()) {
         Ok(weather_forecast_message) => {
-            println!("{}", weather_forecast_message.pretty());
+            println!("{}", weather_forecast_message.to_string());
         }
         Err(error) => handle_error(error),
     }
