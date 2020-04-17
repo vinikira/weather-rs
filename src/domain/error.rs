@@ -1,7 +1,13 @@
-use crate::types::WeatherError;
 use std::error;
 use std::fmt;
 use std::num::ParseFloatError;
+
+#[derive(Debug)]
+pub enum WeatherError {
+    ParseError,
+    AdapterError,
+    MissingArgument(&'static str),
+}
 
 impl fmt::Display for WeatherError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

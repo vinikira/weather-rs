@@ -1,6 +1,4 @@
-use crate::types::Place;
-use crate::types::Weather;
-use crate::types::WeatherError;
+use crate::domain::{Place, Weather, WeatherError};
 
 pub mod metaweather;
 

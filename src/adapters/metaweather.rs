@@ -1,10 +1,8 @@
 use crate::adapters::WeatherAdapter;
-use crate::types::{Coordinates, LocationType, Place};
-use crate::types::{
-    Temperature, Weather, WeatherForecast, WeatherState, WindDirection, WindDirectionCompass,
-    WindSpeed,
+use crate::domain::{
+    Coordinates, LocationType, Place, Temperature, Weather, WeatherError, WeatherForecast,
+    WeatherResult, WeatherState, WindDirection, WindDirectionCompass, WindSpeed,
 };
-use crate::types::{WeatherError, WeatherResult};
 use chrono::{DateTime, NaiveDate, Utc};
 use std::convert::TryFrom;
 
@@ -159,7 +157,7 @@ fn consolidated_weather_to_weather_prevision(
 impl TryFrom<&WeatherResponse> for Weather {
     type Error = WeatherError;
 
-    fn try_from(weather_response: &WeatherResponse) -> Result<Self, WeatherError> {
+    fn try_from(weather_response: &WeatherResponse) -> Result<Self, Self::Error> {
         let weather_forecasts: WeatherResult<Vec<WeatherForecast>> = weather_response
             .consolidated_weather
             .iter()

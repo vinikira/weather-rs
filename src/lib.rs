@@ -2,5 +2,7 @@
 extern crate serde_derive;
 
 pub mod adapters;
-mod logic;
-pub mod types;
+mod cli_app;
+mod domain;
+
+pub use cli_app::*;

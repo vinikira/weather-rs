@@ -1,5 +1,28 @@
-use crate::types::Coordinates;
-use crate::types::Place;
+#[derive(Serialize)]
+pub struct Place {
+    pub id: String,
+    pub name: String,
+    pub location_type: LocationType,
+    pub coordinates: Coordinates,
+}
+
+#[derive(Serialize)]
+pub struct Coordinates {
+    pub latt: CoordinateUnit,
+    pub long: CoordinateUnit,
+}
+
+pub type CoordinateUnit = f32;
+
+#[derive(Serialize)]
+pub enum LocationType {
+    City,
+    RegionOrStateOrProvince,
+    Country,
+    Continent,
+    NotDefined,
+}
+
 
 impl std::fmt::Display for Place {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

@@ -1,4 +1,68 @@
-use crate::types::{Temperature, Weather, WeatherForecast, WeatherState};
+use crate::domain::place::Place;
+use chrono::{DateTime, NaiveDate, Utc};
+
+#[derive(Serialize)]
+pub struct Weather {
+    pub place: Place,
+    pub place_parent: Place,
+    pub weather_forecasts: Vec<WeatherForecast>,
+}
+
+#[derive(Serialize)]
+pub struct WeatherForecast {
+    pub state: WeatherState,
+    pub created_date: DateTime<Utc>,
+    pub applicable_date: NaiveDate,
+    pub temp: Temperature,
+    pub min: Temperature,
+    pub max: Temperature,
+    pub wind_speed: WindSpeed,
+    pub wind_direction: WindDirection,
+    pub wind_direction_compass: WindDirectionCompass,
+    pub humidity: Humidity,
+}
+
+pub type Humidity = f32;
+
+#[derive(PartialEq, Debug, Serialize)]
+pub enum Temperature {
+    Celsius(f32),
+    Farenheit(f32),
+    Kelvin(f32),
+}
+
+#[derive(Serialize)]
+pub enum WindSpeed {
+    MPH(f32),
+    KPH(f32),
+}
+
+#[derive(Serialize)]
+pub enum WindDirection {
+    Degrees(f32),
+}
+
+#[derive(Serialize)]
+pub enum WindDirectionCompass {
+    N,
+    E,
+    S,
+    W,
+}
+
+#[derive(Serialize)]
+pub enum WeatherState {
+    Clear,
+    Hail,
+    HeavyCloud,
+    HeavyRain,
+    LightCloud,
+    LightRain,
+    Showers,
+    Sleet,
+    Snow,
+    Thunderstorm,
+}
 
 impl std::fmt::Display for Weather {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
