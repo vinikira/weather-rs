@@ -48,17 +48,19 @@ impl<'a> CLIApp<'a> {
         let city_name = match search_args.value_of("place_name") {
             Some(name) => name,
             None => {
-                return Self::handle_error(WeatherError::MissingArgument("place name"));
+                return handle_error(WeatherError::MissingArgument("place name"));
             }
         };
 
         let search_results = match self.get_provider().search_place(city_name.to_string()) {
             Ok(results) => results,
-            Err(error) => return Self::handle_error(error),
+            Err(error) => return handle_error(error),
         };
 
         let search_message = if print_json {
-            serde_json::to_string_pretty(&search_results).unwrap_or("".to_string())
+            let result = serde_json::to_string_pretty(&search_results);
+
+            handle_serde_result(result)
         } else {
             search_results
                 .iter()
@@ -75,25 +77,34 @@ impl<'a> CLIApp<'a> {
         let id = match get_matches.value_of("place_id") {
             Some(id) => id,
             None => {
-                return Self::handle_error(WeatherError::MissingArgument("place id"));
+                return handle_error(WeatherError::MissingArgument("place id"));
             }
         };
 
         let weather_forecast_result = match self.get_provider().get_weather(id.to_string()) {
             Ok(weather_forecast) => weather_forecast,
-            Err(error) => return Self::handle_error(error),
+            Err(error) => return handle_error(error),
         };
 
         let weather_forecast_message = if print_json {
-            serde_json::to_string_pretty(&weather_forecast_result).unwrap_or("".to_string())
+            let result = serde_json::to_string_pretty(&weather_forecast_result);
+
+            handle_serde_result(result)
         } else {
             weather_forecast_result.to_string()
         };
 
         println!("{}", weather_forecast_message);
     }
+}
 
-    fn handle_error(e: WeatherError) {
-        println!("{}", e);
+fn handle_serde_result(result: Result<String, serde_json::error::Error>) -> String {
+    match result {
+        Ok(val) => val,
+        Err(error) => format!("Wrong response from provider: {}", error),
     }
+}
+
+fn handle_error(e: WeatherError) {
+    println!("{}", e);
 }
